@@ -6,9 +6,11 @@ import { readFileSync } from "fs";
 
 const input = readFileSync("./input.txt", "utf8").trim();
 
-console.log(calculatePartOne(input));
+console.log(`Solution for part one: ${calculateHash(input)}`);
 
-function calculatePartOne(input) {
+console.log(`Solution for part two: ${calculateFocusingPower(input)}`);
+
+function calculateHash(input) {
   const segments = input.split(",");
   const segmentValues = segments.map((segment) => {
     return segment.split("").reduce((acc, curr) => {
@@ -22,4 +24,57 @@ function calculatePartOne(input) {
   return segmentValues.reduce((acc, curr) => {
     return acc + curr;
   }, 0);
+}
+
+function placeBoxes(input) {
+  const segments = input.split(",");
+  const segmentsMap = segments.reduce((acc, curr, index) => {
+    const key = curr.endsWith("-") ? curr.slice(0, -1) : curr.split("=")[0];
+    const isRemoval = curr.endsWith("-");
+    if (isRemoval) {
+      delete acc[key];
+      return acc;
+    }
+    const focalLength = parseInt(curr.split("=")[1], 10);
+
+    acc[key] = {
+      focalLength,
+      index: acc[key] ? acc[key].index : index,
+      box: calculateHash(key),
+      key,
+    };
+    return acc;
+  }, {});
+
+  let lastIndex = -1;
+  let lastBox = -1;
+
+  const sortedSegments = Object.values(segmentsMap)
+    .sort((a, b) => b.box - a.box)
+    .sort((a, b) => a.index - b.index)
+    .map((segment, i) => {
+      if (lastBox !== segment.box) {
+        lastIndex = -1;
+        lastBox = segment.box;
+      }
+      lastIndex++;
+      return {
+        ...segment,
+        index: lastIndex,
+      };
+    });
+
+  return sortedSegments;
+}
+
+function calculateFocusingPower(input) {
+  const boxes = placeBoxes(input);
+
+  const focusingPower = boxes.reduce((acc, curr) => {
+    const keyFocusingPower =
+      (curr.box + 1) * (curr.index + 1) * curr.focalLength;
+    return acc + keyFocusingPower;
+  }, 0);
+
+  return focusingPower;
 }
