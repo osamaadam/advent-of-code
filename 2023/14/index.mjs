@@ -11,25 +11,13 @@ const DIRECTIONS = {
   EAST: [0, 1],
 };
 
-// const input = readFileSync("./input.txt", "utf-8").trim();
+const input = readFileSync("./input.txt", "utf-8").trim();
 
-// const weight = calculatePartOne(input);
-//
-// console.log(`Weight for part 1: ${weight}`);
+const weight = calculatePartOne(input);
 
-const weight2 = calculatePartTwo(
-  `
-O....#....
-O.OO#....#
-.....##...
-OO.#O....O
-.O.....O#.
-O.#..O.#.#
-..O..#O..O
-.......O..
-#....###..
-#OO..#....`.trim(),
-);
+console.log(`Weight for part 1: ${weight}`);
+
+const weight2 = calculatePartTwo(input);
 
 console.log(`Weight for part 2: ${weight2}`);
 
@@ -42,7 +30,10 @@ function parseText(text) {
 }
 
 function stringifyRows(rows) {
-  return rows.map((row) => row.join("")).join("\n");
+  return rows
+    .map((row) => row.join(""))
+    .join("\n")
+    .trim();
 }
 
 function calculateWeight(text) {
@@ -110,13 +101,45 @@ function calculatePartTwo(input) {
     DIRECTIONS.EAST,
   ];
 
-  for (let i = 0; i < 1000000000; i++) {
+  const seen = new Set();
+  seen.add(input);
+
+  const numOfCycles = 1000000000;
+  let cycleLength = 0;
+  let rowsAfterRepeat = null;
+  let lastSeen = 0;
+
+  for (let i = 0; i < numOfCycles; i++) {
     for (const c of cycles) {
       rows = cycle(rows, c);
     }
+
+    const stringifiedRows = stringifyRows(rows);
+
+    if (seen.has(stringifiedRows)) {
+      const repeatIndex = i;
+      lastSeen = [...seen].indexOf(stringifiedRows);
+
+      cycleLength = repeatIndex - lastSeen;
+      rowsAfterRepeat = rows;
+      break;
+    }
+
+    seen.add(stringifiedRows);
   }
 
-  console.log(stringifyRows(rows));
+  if (rowsAfterRepeat !== null) {
+    rows = rowsAfterRepeat;
+    const remainingCycles = (numOfCycles - lastSeen) % (cycleLength + 1);
 
-  return calculateWeight(stringifyRows(rows));
+    for (let i = 0; i < remainingCycles; i++) {
+      for (const c of cycles) {
+        rows = cycle(rows, c);
+      }
+    }
+  }
+
+  const strigifiedRows = stringifyRows(rows);
+
+  return calculateWeight(strigifiedRows);
 }
