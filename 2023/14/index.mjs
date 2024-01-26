@@ -1,14 +1,37 @@
 import { readFileSync } from "fs";
 
-const MOVABLE_ROCK = "0";
+const MOVABLE_ROCK = "O";
 const STATIC_ROCK = "#";
 const EMPTY = ".";
 
-const input = readFileSync("./input.txt", "utf-8").trim();
+const DIRECTIONS = {
+  NORTH: [-1, 0],
+  WEST: [0, -1],
+  SOUTH: [1, 0],
+  EAST: [0, 1],
+};
 
-const weight = calculatePartOne(input);
+// const input = readFileSync("./input.txt", "utf-8").trim();
 
-console.log(`Weight for part 1: ${weight}`);
+// const weight = calculatePartOne(input);
+//
+// console.log(`Weight for part 1: ${weight}`);
+
+const weight2 = calculatePartTwo(
+  `
+O....#....
+O.OO#....#
+.....##...
+OO.#O....O
+.O.....O#.
+O.#..O.#.#
+..O..#O..O
+.......O..
+#....###..
+#OO..#....`.trim(),
+);
+
+console.log(`Weight for part 2: ${weight2}`);
 
 function parseText(text) {
   const lines = text.split("\n");
@@ -38,26 +61,62 @@ function calculateWeight(text) {
 }
 
 function calculatePartOne(input) {
-  const rows = parseText(input);
-  for (let i = 0; i < rows.length; i++) {
-    for (let j = 0; j < rows[i].length; j++) {
-      let x = i;
-      let y = j;
-      /**
-       * For some reason "0" === "0" keeps evaluating to false in node 20
-       * Hence, the weird conditionals
-       */
-      if (rows[x][y] != EMPTY && rows[x][y] != STATIC_ROCK) {
-        while (x >= 1 && rows[x - 1][y] === EMPTY) {
-          rows[x - 1][y] = MOVABLE_ROCK;
-          rows[x][y] = EMPTY;
-          x--;
-        }
-      }
-    }
-  }
+  let rows = parseText(input);
+
+  rows = cycle(rows, DIRECTIONS.NORTH);
 
   const weight = calculateWeight(stringifyRows(rows));
 
   return weight;
+}
+
+function cycle(rows, direction) {
+  for (let i = 0; i < rows.length; i++) {
+    for (let j = 0; j < rows[i].length; j++) {
+      let x = i;
+      let y = j;
+      if (rows[x][y] === MOVABLE_ROCK) {
+        let lastSeenEmptySpot = [x, y];
+        while (
+          x >= 0 &&
+          x < rows.length &&
+          y >= 0 &&
+          y < rows[x].length &&
+          rows[x][y] !== STATIC_ROCK
+        ) {
+          if (rows[x][y] === EMPTY) {
+            lastSeenEmptySpot = [x, y];
+          }
+          x += direction[0];
+          y += direction[1];
+        }
+        const temp = rows[lastSeenEmptySpot[0]][lastSeenEmptySpot[1]];
+        rows[lastSeenEmptySpot[0]][lastSeenEmptySpot[1]] = rows[i][j];
+        rows[i][j] = temp;
+      }
+    }
+  }
+
+  return rows;
+}
+
+function calculatePartTwo(input) {
+  let rows = parseText(input);
+
+  const cycles = [
+    DIRECTIONS.NORTH,
+    DIRECTIONS.WEST,
+    DIRECTIONS.SOUTH,
+    DIRECTIONS.EAST,
+  ];
+
+  for (let i = 0; i < 1000000000; i++) {
+    for (const c of cycles) {
+      rows = cycle(rows, c);
+    }
+  }
+
+  console.log(stringifyRows(rows));
+
+  return calculateWeight(stringifyRows(rows));
 }
