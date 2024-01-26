@@ -50,9 +50,8 @@ function placeBoxes(input) {
   let lastBox = -1;
 
   const sortedSegments = Object.values(segmentsMap)
-    .sort((a, b) => b.box - a.box)
-    .sort((a, b) => a.index - b.index)
-    .map((segment, i) => {
+    .sort((a, b) => a.box - b.box || a.index - b.index)
+    .map((segment) => {
       if (lastBox !== segment.box) {
         lastIndex = -1;
         lastBox = segment.box;
