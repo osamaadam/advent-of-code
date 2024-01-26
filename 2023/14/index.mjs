@@ -130,6 +130,9 @@ function calculatePartTwo(input) {
 
   if (rowsAfterRepeat !== null) {
     rows = rowsAfterRepeat;
+    /**
+     * The plus one is honestly just trial and error. I don't know why it needs to be there.
+     */
     const remainingCycles = (numOfCycles - lastSeen) % (cycleLength + 1);
 
     for (let i = 0; i < remainingCycles; i++) {
