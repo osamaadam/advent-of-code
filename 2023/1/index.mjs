@@ -1,8 +1,6 @@
-import { readFile } from "fs/promises";
+import { parseInput } from "../util/parseInput.mjs";
 
-const input = (await readFile("input.txt", "utf8")).trim();
-
-const lines = input.split("\n").map((line) => line.trim());
+const lines = await parseInput("input.txt");
 
 const digitLines = lines
   .map((line) => line.split("").filter((c) => !isNaN(c)))
