@@ -28,32 +28,26 @@ const alphaDigitsMap = {
   nine: "9",
 };
 
-const alphaDigits = Object.keys(alphaDigitsMap);
-
-function findAlphaDigits(line) {
-  const indexMap = {};
-  for (const alphaDigit of alphaDigits) {
-    if (line.includes(alphaDigit)) {
-      indexMap[alphaDigit] = line.indexOf(alphaDigit);
-    }
-  }
-
-  return indexMap;
-}
-
 function convertAlphaDigits(line) {
-  const indexMap = findAlphaDigits(line);
-  const sortedAlphaDigits = Object.entries(indexMap)
-    .map(([alphaDigit, index]) => ({
-      alphaDigit,
-      index,
-    }))
-    .sort((a, b) => a.index - b.index)
-    .map(({ alphaDigit }) => alphaDigit);
-  for (const alphaDigit of sortedAlphaDigits) {
-    if (line.includes(alphaDigit)) {
-      line = line.replace(alphaDigit, alphaDigitsMap[alphaDigit]);
+  let left = 0;
+  let right = left;
+  let curSlice = "";
+
+  while (left < line.length) {
+    if (!isNaN(line[left])) {
+      left++;
+      continue;
     }
+    right = left + 2;
+    while (right < line.length) {
+      curSlice = line.slice(left, right + 1);
+      if (curSlice in alphaDigitsMap) {
+        const digit = alphaDigitsMap[curSlice];
+        line = line.slice(0, left) + digit + line.slice(right);
+      }
+      right++;
+    }
+    left++;
   }
 
   return line;
@@ -67,9 +61,9 @@ const convertedDigitLines = convertedLines.map((line) =>
   line.split("").filter((c) => !isNaN(c)),
 );
 
-const convertedDigits = convertedDigitLines
-  .map((line) => (line.length > 1 ? line : "0".concat(line)))
-  .map((line) => parseInt(`${line[0]}${line[line.length - 1]}`, 10));
+const convertedDigits = convertedDigitLines.map((line) =>
+  parseInt(`${line[0]}${line[line.length - 1]}`, 10),
+);
 
 const convertedSum = convertedDigits.reduce((acc, digit) => acc + digit, 0);
 
