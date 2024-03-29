@@ -51,3 +51,39 @@ const result = possibleGames
   .reduce((acc, id) => acc + id, 0);
 
 console.log(`The answer to part 1 is: ${result}`);
+
+function findLeastNumberOfCubes(game) {
+  const rounds = Object.values(game);
+
+  const leastNumberOfCubes = {
+    red: 0,
+    green: 0,
+    blue: 0,
+  };
+
+  rounds[0].forEach((round) => {
+    leastNumberOfCubes.red = round.red
+      ? Math.max(round.red, leastNumberOfCubes.red)
+      : leastNumberOfCubes.red;
+
+    leastNumberOfCubes.green = round.green
+      ? Math.max(round.green, leastNumberOfCubes.green)
+      : leastNumberOfCubes.green;
+
+    leastNumberOfCubes.blue = round.blue
+      ? Math.max(round.blue, leastNumberOfCubes.blue)
+      : leastNumberOfCubes.blue;
+  });
+
+  return leastNumberOfCubes;
+}
+
+const partTwoResult = games
+  .map((game) =>
+    Object.values(findLeastNumberOfCubes(game))
+      .filter((num) => num > 0)
+      .reduce((acc, cur) => acc * cur, 1),
+  )
+  .reduce((acc, cur) => acc + cur, 0);
+
+console.log(`The solution to part two is: ${partTwoResult}`);
