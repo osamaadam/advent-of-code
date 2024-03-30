@@ -68,3 +68,22 @@ const lowestLocation = finalLocations.reduce(
 );
 
 console.log(`The solution to part 1 is: ${lowestLocation}`);
+
+let actualSeeds = [];
+
+for (let i = 0; i < seeds.length; i += 2) {
+  for (let j = seeds[i]; j < seeds[i] + seeds[i + 1]; j++) {
+    actualSeeds.push(j);
+  }
+}
+
+const actualFinalLocations = actualSeeds.map((seed) =>
+  traverseMap("seed", "location", seed),
+);
+
+const actualLowestLocation = actualFinalLocations.reduce(
+  (prev, cur) => Math.min(prev, cur),
+  Infinity,
+);
+
+console.log(`The solution for part 2 is: ${actualLowestLocation}`);
