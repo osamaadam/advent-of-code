@@ -14,7 +14,7 @@ const lines = await parseInput("input.txt");
  */
 function parseCard(line) {
   const [idPart, numsPart] = line.split(": ");
-  const cardId = parseInt(idPart.split(" ")[1], 10);
+  const cardId = parseInt(idPart.split(" ").at(-1).trim(), 10);
   const [winningPart, propertyPart] = numsPart.split(" | ");
   const winningNums = winningPart
     .split(" ")
@@ -52,33 +52,32 @@ const totalCardValues = cardValues.reduce((prev, cur) => prev + cur, 0);
 
 console.log(`The solution for part one is: ${totalCardValues}`);
 
-let countOfCards = cards.length;
+function calculateWinnings(card) {
+  return card.winningNums.filter((num) => card.numsYouHave.includes(num))
+    .length;
+}
 
-let index = 0;
-while (index < cards.length) {
-  const card = cards[index];
-  const winningNumsYouHave = card.winningNums.filter((num) =>
-    card.numsYouHave.includes(num),
-  );
+const cardsMap = cards.reduce(
+  (prev, cur) => ({ ...prev, [cur.cardId]: 1 }),
+  {},
+);
 
-  let winnings = winningNumsYouHave.length;
-  let nextCardIndex = findNextCardIndex(card.cardId);
-  while (nextCardIndex > index && winnings > 0) {
-    const nextCard = cards[nextCardIndex];
-    cards = [
-      ...cards.slice(0, nextCardIndex),
-      nextCard,
-      ...cards.slice(nextCardIndex),
-    ];
-    nextCardIndex = findNextCardIndex(nextCard.cardId);
+for (let card of cards) {
+  let winnings = calculateWinnings(card);
+  const nextCardIndexes = Object.keys(cardsMap)
+    .filter((cardId) => +cardId > +card.cardId)
+    .sort((a, b) => a - b);
+
+  let curInstances = cardsMap[card.cardId];
+  for (let nextIndex of nextCardIndexes) {
+    if (winnings <= 0) {
+      break;
+    }
+    cardsMap[nextIndex] += curInstances;
     winnings--;
   }
-  countOfCards += winningNumsYouHave.length - winnings;
-  index++;
 }
 
-function findNextCardIndex(i) {
-  return cards.findIndex((itCard) => itCard.cardId === i + 1);
-}
+const cardsCount = Object.values(cardsMap).reduce((prev, cur) => prev + cur, 0);
 
-console.log(`The solution to part two is: ${countOfCards}`);
+console.log(`The solution to part 2 is: ${cardsCount}`);
