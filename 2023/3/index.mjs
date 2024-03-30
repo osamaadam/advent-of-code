@@ -3,8 +3,8 @@ import { parseInput } from "../util/parseInput.mjs";
 const lines = await parseInput("input.txt");
 const matrix = lines.map((line) => line.split(""));
 
-function isPartNumber(row, col) {
-  const adjacentCells = [
+function getAdjacentCells(row, col) {
+  return [
     [row + 1, col],
     [row - 1, col],
     [row, col + 1],
@@ -16,7 +16,10 @@ function isPartNumber(row, col) {
   ].filter(
     ([r, c]) => r >= 0 && r < matrix.length && c >= 0 && c < matrix.length,
   );
+}
 
+function isPartNumber(row, col) {
+  const adjacentCells = getAdjacentCells(row, col);
   for (const [r, c] of adjacentCells) {
     const cell = matrix[r][c];
     if (isNaN(cell) && cell !== ".") {
@@ -40,15 +43,7 @@ function findPartNumbers() {
             false,
           );
           if (isCurPartNumber) {
-            const partNumber = parseInt(
-              curNumber.reduce(
-                (prev, cur) => prev + matrix[cur[0]][cur[1]],
-                "",
-              ),
-              10,
-            );
-
-            partNumbers.push(partNumber);
+            partNumbers.push(curNumber);
           }
         }
         curNumber = [];
@@ -61,8 +56,20 @@ function findPartNumbers() {
   return partNumbers;
 }
 
+function getPartNumber(positionalPartNumber) {
+  return parseInt(
+    positionalPartNumber.reduce(
+      (prev, cur) => prev + matrix[cur[0]][cur[1]],
+      "",
+    ),
+    10,
+  );
+}
+
 const partNumbers = findPartNumbers();
 
-const partOneResult = partNumbers.reduce((prev, cur) => prev + cur, 0);
+const partOneResult = partNumbers
+  .map(getPartNumber)
+  .reduce((prev, cur) => prev + cur, 0);
 
 console.log(`The answer to part 1 is: ${partOneResult}`);
