@@ -69,21 +69,60 @@ const lowestLocation = finalLocations.reduce(
 
 console.log(`The solution to part 1 is: ${lowestLocation}`);
 
-let actualSeeds = [];
+function parseRange(range) {
+  const [lowerLimit, upperLimit] = range.split("-").map((limit) => +limit);
 
-for (let i = 0; i < seeds.length; i += 2) {
-  for (let j = seeds[i]; j < seeds[i] + seeds[i + 1]; j++) {
-    actualSeeds.push(j);
-  }
+  return [lowerLimit, upperLimit];
 }
 
-const actualFinalLocations = actualSeeds.map((seed) =>
-  traverseMap("seed", "location", seed),
-);
+function findIntersectionBetweenRanges(range1, range2) {
+  const [lower1, upper1] = parseRange(range1);
+  const [lower2, upper2] = parseRange(range2);
+  const maxLower = Math.max(lower1, lower2);
+  const leastUpper = Math.min(upper1, upper2);
 
-const actualLowestLocation = actualFinalLocations.reduce(
-  (prev, cur) => Math.min(prev, cur),
-  Infinity,
-);
+  if (maxLower > leastUpper) {
+    return null;
+  }
 
-console.log(`The solution for part 2 is: ${actualLowestLocation}`);
+  return `${maxLower}-${leastUpper}`;
+}
+
+function traverseMapRanges(src, dest, range) {
+  const intersections = new Set([range]);
+  while (src !== dest) {
+    const curIntersections = [...intersections];
+    const ranges = Object.keys(almanac[src].translations);
+
+    for (let range of curIntersections) {
+      for (let destRange of ranges) {
+        const intersection =
+          findIntersectionBetweenRanges(range, destRange) ?? range;
+        const [lower, upper] = parseRange(intersection);
+        const newLower = traverseMap(src, almanac[src].dest, lower);
+        const newUpper = traverseMap(src, almanac[src].dest, upper);
+
+        const newRange = `${Math.min(newLower, newUpper)}-${Math.max(newLower, newUpper)}`;
+        console.log({ src, dest, newRange, intersection, range, destRange });
+        intersections.delete(range);
+        intersections.add(newRange);
+      }
+    }
+
+    src = almanac[src].dest;
+  }
+  return [...intersections].sort((a, b) => {
+    const [aLower, _] = parseRange(a);
+    const [bLower, __] = parseRange(b);
+
+    return aLower - bLower;
+  });
+}
+
+const seedRanges = [];
+
+for (let i = 0; i < seeds.length; i += 2) {
+  seedRanges.push(`${seeds[i]}-${seeds[i] + seeds[i + 1] - 1}`);
+}
+
+console.log(traverseMapRanges("seed", "humidity", `79-82`));
