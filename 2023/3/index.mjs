@@ -73,3 +73,44 @@ const partOneResult = partNumbers
   .reduce((prev, cur) => prev + cur, 0);
 
 console.log(`The answer to part 1 is: ${partOneResult}`);
+
+function findGearRatio() {
+  let ratio = 0;
+  for (let row = 0; row < matrix.length; row++) {
+    for (let col = 0; col < matrix.length; col++) {
+      const cell = matrix[row][col];
+      if (cell !== "*") {
+        continue;
+      }
+
+      const adjacentCells = getAdjacentCells(row, col);
+      const adjPosPartNumbers = [];
+      for (const [r, c] of adjacentCells) {
+        for (let posPN of partNumbers) {
+          let foundPN = false;
+          for (let posDigit of posPN) {
+            if (posDigit[0] === r && posDigit[1] === c) {
+              if (!adjPosPartNumbers.includes(posPN)) {
+                adjPosPartNumbers.push(posPN);
+              }
+              foundPN = true;
+              break;
+            }
+          }
+          if (foundPN) {
+            break;
+          }
+        }
+      }
+      if (adjPosPartNumbers.length === 2) {
+        const adjPartNumbers = adjPosPartNumbers.map(getPartNumber);
+
+        ratio += adjPartNumbers[0] * adjPartNumbers[1];
+      }
+    }
+  }
+
+  return ratio;
+}
+
+console.log(`The answer to part two is: ${findGearRatio()}`);
