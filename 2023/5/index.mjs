@@ -20,7 +20,7 @@ for (let line of lines.slice(1)) {
     const curTransformText = line.split(" ")[0];
     const [src, _, dest] = curTransformText.split("-");
     curTransform = { src, dest };
-    almanac[src] = { dest };
+    almanac[src] = { dest, translations: {} };
     continue;
   }
 
@@ -31,9 +31,8 @@ for (let line of lines.slice(1)) {
 
   const [destStart, srcStart, range] = nums;
   const { src } = curTransform;
-  for (let i = 0; i < range; i++) {
-    almanac[src][srcStart + i] = destStart + i;
-  }
+  almanac[src]["translations"][`${srcStart}-${srcStart + range - 1}`] =
+    destStart - srcStart;
 }
 
 /**
@@ -43,7 +42,16 @@ for (let line of lines.slice(1)) {
  */
 function traverseMap(src, dest, org) {
   while (src !== dest) {
-    org = almanac[src][org] ?? org;
+    const { translations } = almanac[src];
+    const ranges = Object.keys(translations).map((strRange) =>
+      strRange.split("-").map((limit) => +limit),
+    );
+    for (let [lowerLimit, upperLimit] of ranges) {
+      if (org >= lowerLimit && org <= upperLimit) {
+        org += translations[`${lowerLimit}-${upperLimit}`];
+        break;
+      }
+    }
     src = almanac[src].dest;
   }
 
