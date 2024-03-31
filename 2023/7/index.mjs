@@ -59,7 +59,7 @@ const CARDS = {
  * @param {Play} play
  * @returns {string}
  */
-function rankPlay(play) {
+let rankPlay = (play) => {
   const map = {};
   const { cards } = play;
 
@@ -91,21 +91,16 @@ function rankPlay(play) {
     default:
       return RANKS_MAP.HIGH_CARD;
   }
-}
-
-plays.forEach((play) => {
-  const rank = rankPlay(play);
-  const { cards } = play;
-  const weight = RANKS.findIndex((r) => r === rank);
-});
+};
 
 /**
  * @param {Play} play1
  * @param {Play} play2
+ * @param {(Play) => string} rankPlay
  *
  * @returns {Number}
  */
-function sortPlays(play1, play2) {
+function sortPlays(play1, play2, rankPlay) {
   const rank1 = rankPlay(play1);
   const rank2 = rankPlay(play2);
 
@@ -128,7 +123,7 @@ function sortPlays(play1, play2) {
   return weight1 - weight2;
 }
 
-const sortedPlays = plays.sort(sortPlays);
+const sortedPlays = plays.sort((a, b) => sortPlays(a, b, rankPlay));
 
 const partOneSolution = sortedPlays.reduce(
   (prev, cur, i) => prev + cur.bid * (i + 1),
@@ -136,3 +131,59 @@ const partOneSolution = sortedPlays.reduce(
 );
 
 console.log(`The solution to part one is: ${partOneSolution}`);
+
+Object.keys(CARDS).forEach((card) => {
+  CARDS[card] += 1;
+});
+
+CARDS.J = 0;
+
+/**
+ * @param {Play} play
+ * @returns {string}
+ */
+function rankPlayJokers(play) {
+  const map = {};
+  const { cards } = play;
+
+  cards.split("").forEach((card) => {
+    if (card in map) {
+      map[card] += 1;
+    } else {
+      map[card] = 1;
+    }
+  });
+
+  const jokers = map["J"] || 0;
+  delete map["J"];
+
+  const nums = Object.values(map).sort((a, b) => b - a);
+  const num = nums[0] + jokers || jokers;
+
+  switch (num) {
+    case 5:
+      return RANKS_MAP.FIVE_OF_KIND;
+    case 4:
+      return RANKS_MAP.FOUR_OF_KIND;
+    case 3:
+      if (nums[1] === 2) {
+        return RANKS_MAP.FULL_HOUSE;
+      }
+      return RANKS_MAP.THREE_OF_KIND;
+    case 2:
+      if (nums[1] === 2) {
+        return RANKS_MAP.TWO_PAIR;
+      }
+      return RANKS_MAP.ONE_PAIR;
+    default:
+      return RANKS_MAP.HIGH_CARD;
+  }
+}
+
+const sortedPlays2 = plays.sort((a, b) => sortPlays(a, b, rankPlayJokers));
+
+const totalWeight = sortedPlays2
+  .map((play) => play.bid)
+  .reduce((prev, cur, i) => prev + cur * (i + 1), 0);
+
+console.log(`The solution to part 2 is: ${totalWeight}`);
