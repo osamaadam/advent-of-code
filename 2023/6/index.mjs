@@ -14,10 +14,7 @@ function parseLine(line) {
 const times = parseLine(lines[0]);
 const distances = parseLine(lines[1]);
 
-function findWaysToWin(gameIndex) {
-  const gameTime = times[gameIndex];
-  const gameDistance = distances[gameIndex];
-
+function findWaysToWin(gameTime, gameDistance) {
   let waysToWin = 0;
 
   for (let chargingTime = 1; chargingTime < gameTime - 1; chargingTime++) {
@@ -33,9 +30,16 @@ function findWaysToWin(gameIndex) {
 }
 
 const waysToWinEach = Array.from(Array(times.length)).map((_, gameIndex) =>
-  findWaysToWin(gameIndex),
+  findWaysToWin(times[gameIndex], distances[gameIndex]),
 );
 
 const partOneSolution = waysToWinEach.reduce((prev, cur) => prev * cur, 1);
 
 console.log(`The solution to part one is: ${partOneSolution}`);
+
+const time = times.map((t) => String(t)).join("");
+const distance = distances.map((d) => String(d)).join("");
+
+const partTwoSolution = findWaysToWin(time, distance);
+
+console.log(`The solution to part 2 is: ${partTwoSolution}`);
