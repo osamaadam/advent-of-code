@@ -75,47 +75,75 @@ function parseRange(range) {
   return [lowerLimit, upperLimit];
 }
 
-function findIntersectionBetweenRanges(range1, range2) {
+function findIntersection(range1, range2) {
   const [lower1, upper1] = parseRange(range1);
   const [lower2, upper2] = parseRange(range2);
   const maxLower = Math.max(lower1, lower2);
   const leastUpper = Math.min(upper1, upper2);
 
-  if (maxLower > leastUpper) {
+  if (maxLower >= leastUpper) {
     return null;
   }
 
   return `${maxLower}-${leastUpper}`;
 }
 
-function traverseMapRanges(src, dest, range) {
-  const intersections = new Set([range]);
+function subractRanges(range1, range2) {
+  const [lower1, upper1] = parseRange(range1);
+  const [lower2, upper2] = parseRange(range2);
+
+  let ranges = [];
+
+  if (lower1 <= lower2) {
+    if (upper1 < upper2) {
+      ranges.push(`${lower1}-${lower2 - 1}`);
+    }
+    if (upper1 > upper2) {
+      ranges.push(`${upper2 + 1}-${upper1}`);
+    }
+  } else if (lower1 >= lower2) {
+    if (upper1 > upper2) {
+      ranges.push(`${upper2 + 1}-${upper1}`);
+    }
+  }
+
+  return ranges;
+}
+
+function traverseMapRanges(src, dest, ranges) {
+  const rangeSet = new Set([...ranges]);
+
   while (src !== dest) {
-    const curIntersections = [...intersections];
-    const ranges = Object.keys(almanac[src].translations);
-
-    for (let range of curIntersections) {
-      for (let destRange of ranges) {
-        const intersection =
-          findIntersectionBetweenRanges(range, destRange) ?? range;
+    const { translations } = almanac[src];
+    const curRanges = [...rangeSet];
+    for (let range of curRanges) {
+      for (let [destRange, val] of Object.entries(translations)) {
+        const intersection = findIntersection(range, destRange);
+        if (!intersection) {
+          continue;
+        }
+        const oldRanges = subractRanges(range, destRange);
         const [lower, upper] = parseRange(intersection);
-        const newLower = traverseMap(src, almanac[src].dest, lower);
-        const newUpper = traverseMap(src, almanac[src].dest, upper);
-
-        const newRange = `${Math.min(newLower, newUpper)}-${Math.max(newLower, newUpper)}`;
-        console.log({ src, dest, newRange, intersection, range, destRange });
-        intersections.delete(range);
-        intersections.add(newRange);
+        const newRange = `${lower + val}-${upper + val}`;
+        const newRanges = oldRanges
+          .map((oldRange) => subractRanges(oldRange, newRange))
+          .flat();
+        newRanges.push(newRange);
+        rangeSet.delete(range);
+        newRanges.forEach((range) => {
+          rangeSet.add(range);
+        });
       }
     }
 
     src = almanac[src].dest;
   }
-  return [...intersections].sort((a, b) => {
-    const [aLower, _] = parseRange(a);
-    const [bLower, __] = parseRange(b);
 
-    return aLower - bLower;
+  return [...rangeSet].sort((a, b) => {
+    const [lower1, _] = parseRange(a);
+    const [lower2, __] = parseRange(b);
+
+    return lower1 - lower2;
   });
 }
 
@@ -125,4 +153,4 @@ for (let i = 0; i < seeds.length; i += 2) {
   seedRanges.push(`${seeds[i]}-${seeds[i] + seeds[i + 1] - 1}`);
 }
 
-console.log(traverseMapRanges("seed", "humidity", `79-82`));
+console.log(traverseMapRanges("seed", "location", seedRanges));
