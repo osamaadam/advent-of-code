@@ -47,7 +47,7 @@ function findSteps(startingNode, destNode) {
   return steps;
 }
 
-// console.log(`The solution to part 1 is: ${findSteps("AAA", "ZZZ")}`);
+console.log(`The solution to part 1 is: ${findSteps("AAA", "ZZZ")}`);
 
 iterator = 0;
 
@@ -60,11 +60,15 @@ function findStepsAgain() {
     (node) => getLastLetter(node) === "A",
   );
   let steps = 0;
+  const stepsToZ = Array.from(startingNodes).map(() => Infinity);
 
-  while (!startingNodes.every((node) => getLastLetter(node) === "Z")) {
+  while (stepsToZ.some((steps) => steps >= Infinity)) {
     const instr = next();
 
     for (let i in startingNodes) {
+      if (getLastLetter(startingNodes[i]) === "Z") {
+        stepsToZ[i] = Math.min(stepsToZ[i], steps);
+      }
       switch (instr) {
         case "L":
           startingNodes[i] = map[startingNodes[i]].left;
@@ -77,7 +81,13 @@ function findStepsAgain() {
     steps++;
   }
 
-  return steps;
+  const gcd = (a, b) => (a ? gcd(b % a, a) : b);
+
+  const lcm = (a, b) => (a * b) / gcd(a, b);
+
+  const leastCommonMultiple = stepsToZ.reduce(lcm);
+
+  return leastCommonMultiple;
 }
 
-console.log(findStepsAgain());
+console.log(`The solution to part 2 is: ${findStepsAgain()}`);
