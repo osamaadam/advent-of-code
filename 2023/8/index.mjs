@@ -47,4 +47,37 @@ function findSteps(startingNode, destNode) {
   return steps;
 }
 
-console.log(findSteps("AAA", "ZZZ"));
+// console.log(`The solution to part 1 is: ${findSteps("AAA", "ZZZ")}`);
+
+iterator = 0;
+
+function getLastLetter(node) {
+  return node.split("").at(-1);
+}
+
+function findStepsAgain() {
+  const startingNodes = Object.keys(map).filter(
+    (node) => getLastLetter(node) === "A",
+  );
+  let steps = 0;
+
+  while (!startingNodes.every((node) => getLastLetter(node) === "Z")) {
+    const instr = next();
+
+    for (let i in startingNodes) {
+      switch (instr) {
+        case "L":
+          startingNodes[i] = map[startingNodes[i]].left;
+          break;
+        case "R":
+          startingNodes[i] = map[startingNodes[i]].right;
+          break;
+      }
+    }
+    steps++;
+  }
+
+  return steps;
+}
+
+console.log(findStepsAgain());
