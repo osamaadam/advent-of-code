@@ -101,6 +101,11 @@ const visitedCells = navigateLoop(findStartingPos(matrix), matrix);
 
 console.log(`The solution to part one is: ${visitedCells.size / 2}`);
 
+// Hack, have to manually replace S. I'm sure there's a clever way to do it
+// But I'm tired
+const [r, c] = findStartingPos(matrix);
+matrix[r][c] = "L";
+
 /**
  * @param {number[]} startingPos
  * @param {"WEST"|"EAST"} direction
