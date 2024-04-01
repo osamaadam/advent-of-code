@@ -8,9 +8,9 @@ const sequences = lines.map((line) =>
 
 /**
  * @param {number[]} sequence
- * @returns number
+ * @returns {number[]}
  */
-function findNextInSequenceBrute(sequence) {
+function findNextAndPrevInSequence(sequence) {
   const sequences = [sequence];
   let curSequence = sequence;
 
@@ -30,16 +30,28 @@ function findNextInSequenceBrute(sequence) {
       const curSequence = sequences[i];
       const nextSequence = sequences[i + 1];
       sequences[i].push(curSequence.at(-1) + nextSequence.at(-1));
+      sequences[i].unshift(curSequence[0] - nextSequence[0]);
     } else {
       sequences[i].push(0);
+      sequences[i].unshift(0);
     }
   }
 
-  return sequences[0].at(-1);
+  return sequences[0];
 }
 
-const partOneSolution = sequences
-  .map((sequence) => findNextInSequenceBrute(sequence))
+const newSequences = sequences.map((sequence) =>
+  findNextAndPrevInSequence(sequence),
+);
+
+const partOneSolution = newSequences
+  .map((sequence) => sequence.at(-1))
   .reduce((prev, cur) => prev + cur, 0);
 
 console.log(`The solution to part one is: ${partOneSolution}`);
+
+const partTwoSolution = newSequences
+  .map((sequence) => sequence.at(0))
+  .reduce((prev, cur) => prev + cur, 0);
+
+console.log(`The solution to part two is: ${partTwoSolution}`);
