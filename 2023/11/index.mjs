@@ -68,10 +68,7 @@ function calculateTotalPaths(multiplier = 1) {
       const [bR, bC] = galaxies[j];
       const explosions = getExplosionsInbetween(galaxies[i], galaxies[j]);
       const distance =
-        Math.abs(aR - bR) +
-        Math.abs(aC - bC) +
-        explosions * multiplier -
-        explosions;
+        Math.abs(aR - bR) + Math.abs(aC - bC) + explosions * (multiplier - 1);
       totalPaths += distance;
     }
   }
