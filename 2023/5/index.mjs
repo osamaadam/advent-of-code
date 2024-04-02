@@ -88,69 +88,56 @@ function findIntersection(range1, range2) {
   return `${maxLower}-${leastUpper}`;
 }
 
-function subractRanges(range1, range2) {
-  const [lower1, upper1] = parseRange(range1);
-  const [lower2, upper2] = parseRange(range2);
-
-  let ranges = [];
-
-  if (lower1 <= lower2) {
-    if (upper1 < upper2) {
-      ranges.push(`${lower1}-${lower2 - 1}`);
-    }
-    if (upper1 > upper2) {
-      ranges.push(`${upper2 + 1}-${upper1}`);
-    }
-  } else if (lower1 >= lower2) {
-    if (upper1 > upper2) {
-      ranges.push(`${upper2 + 1}-${upper1}`);
-    }
-  }
-
-  return ranges;
-}
-
-function traverseMapRanges(src, dest, ranges) {
-  const rangeSet = new Set([...ranges]);
-
+function traverseMapRanges(src, dest, seedRanges) {
   while (src !== dest) {
-    const { translations } = almanac[src];
-    const curRanges = [...rangeSet];
-    for (let range of curRanges) {
-      for (let [destRange, val] of Object.entries(translations)) {
-        const intersection = findIntersection(range, destRange);
-        if (!intersection) {
-          continue;
+    const next = [];
+
+    while (seedRanges.length) {
+      const curRange = seedRanges.pop();
+      const [seedStart, seedEnd] = parseRange(curRange);
+      const curDest = almanac[src];
+      let didIntersect = false;
+      for (let [interval, delta] of Object.entries(curDest.translations)) {
+        const intersection = findIntersection(curRange, interval);
+        if (intersection) {
+          const [intStart, intEnd] = parseRange(intersection);
+          const newRange = `${intStart + delta}-${intEnd + delta}`;
+          next.push(newRange);
+          if (intStart > seedStart) {
+            seedRanges.push(`${seedStart}-${intStart - 1}`);
+          }
+          if (intEnd < seedEnd) {
+            seedRanges.push(`${intEnd + 1}-${seedEnd}`);
+          }
+          didIntersect = true;
+          break;
         }
-        const oldRanges = subractRanges(range, destRange);
-        const [lower, upper] = parseRange(intersection);
-        const newRange = `${lower + val}-${upper + val}`;
-        const newRanges = oldRanges
-          .map((oldRange) => subractRanges(oldRange, newRange))
-          .flat();
-        newRanges.push(newRange);
-        rangeSet.delete(range);
-        newRanges.forEach((range) => {
-          rangeSet.add(range);
-        });
+      }
+      if (!didIntersect) {
+        next.push(curRange);
       }
     }
 
+    seedRanges = next;
     src = almanac[src].dest;
   }
 
-  return [...rangeSet].sort((a, b) => {
-    const [lower1, _] = parseRange(a);
-    const [lower2, __] = parseRange(b);
+  return seedRanges.sort((a, b) => {
+    const [startA, _] = parseRange(a);
+    const [startB, __] = parseRange(b);
 
-    return lower1 - lower2;
+    return startA - startB;
   });
 }
 
 const seedRanges = [];
 
 for (let i = 0; i < seeds.length; i += 2) {
-  seedRanges.push(`${seeds[i]}-${seeds[i] + seeds[i + 1] - 1}`);
+  seedRanges.push(`${seeds[i]}-${seeds[i] + seeds[i + 1]}`);
 }
 
-console.log(traverseMapRanges("seed", "location", seedRanges));
+const partTwoSolution = parseRange(
+  traverseMapRanges("seed", "location", seedRanges)[0],
+)[0];
+
+console.log(`The solution to part two is: ${partTwoSolution}`);
