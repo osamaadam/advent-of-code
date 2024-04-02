@@ -24,43 +24,40 @@ for (let r = 0; r < matrix.length; r++) {
 
 rowsToExplode = Object.entries(rowsToExplode)
   .filter(([_, isEmpty]) => isEmpty)
-  .map(([key, _val], i) => parseInt(key, 10) + i);
+  .map(([key, _val]) => parseInt(key, 10));
 colsToExplode = Object.entries(colsToExplode)
   .filter(([_, isEmpty]) => isEmpty)
-  .map(([key, _val], i) => parseInt(key, 10) + i);
-
-const emptyRow = Array.from(Array(matrix.length), () => ".");
-
-let explodedMatrix = Array.from(matrix);
-
-for (let r = 0; r < explodedMatrix.length; r++) {
-  if (rowsToExplode.includes(r)) {
-    explodedMatrix = [
-      ...explodedMatrix.slice(0, r),
-      emptyRow,
-      ...explodedMatrix.slice(r),
-    ];
-  }
-  for (let c = 0; c < explodedMatrix[r].length; c++) {
-    if (colsToExplode.includes(c)) {
-      explodedMatrix[r] = [
-        ...explodedMatrix[r].slice(0, c),
-        ".",
-        ...explodedMatrix[r].slice(c),
-      ];
-    }
-  }
-}
+  .map(([key, _val]) => parseInt(key, 10));
 
 const galaxies = [];
 
-for (let r = 0; r < explodedMatrix.length; r++) {
-  for (let c = 0; c < explodedMatrix[r].length; c++) {
-    const curElem = explodedMatrix[r][c];
+for (let r = 0; r < matrix.length; r++) {
+  for (let c = 0; c < matrix[r].length; c++) {
+    const curElem = matrix[r][c];
     if (curElem === "#") {
       galaxies.push([r, c]);
     }
   }
+}
+
+function getExplosionsInbetween(a, b) {
+  const [aR, aC] = a;
+  const [bR, bC] = b;
+
+  let explosions = 0;
+
+  for (let rowExplosion of rowsToExplode) {
+    if (rowExplosion < Math.max(aR, bR) && rowExplosion > Math.min(aR, bR)) {
+      explosions++;
+    }
+  }
+  for (let colExplosion of colsToExplode) {
+    if (colExplosion < Math.max(aC, bC) && colExplosion > Math.min(aC, bC)) {
+      explosions++;
+    }
+  }
+
+  return explosions;
 }
 
 let totalPaths = 0;
@@ -68,7 +65,10 @@ for (let i = 0; i < galaxies.length; i++) {
   const [aR, aC] = galaxies[i];
   for (let j = i + 1; j < galaxies.length; j++) {
     const [bR, bC] = galaxies[j];
-    const distance = Math.abs(aR - bR) + Math.abs(aC - bC);
+    const distance =
+      Math.abs(aR - bR) +
+      Math.abs(aC - bC) +
+      getExplosionsInbetween(galaxies[i], galaxies[j]);
     totalPaths += distance;
   }
 }
