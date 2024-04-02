@@ -60,17 +60,23 @@ function getExplosionsInbetween(a, b) {
   return explosions;
 }
 
-let totalPaths = 0;
-for (let i = 0; i < galaxies.length; i++) {
-  const [aR, aC] = galaxies[i];
-  for (let j = i + 1; j < galaxies.length; j++) {
-    const [bR, bC] = galaxies[j];
-    const distance =
-      Math.abs(aR - bR) +
-      Math.abs(aC - bC) +
-      getExplosionsInbetween(galaxies[i], galaxies[j]);
-    totalPaths += distance;
+function calculateTotalPaths(multiplier = 1) {
+  let totalPaths = 0;
+  for (let i = 0; i < galaxies.length; i++) {
+    const [aR, aC] = galaxies[i];
+    for (let j = i + 1; j < galaxies.length; j++) {
+      const [bR, bC] = galaxies[j];
+      const explosions = getExplosionsInbetween(galaxies[i], galaxies[j]);
+      const distance =
+        Math.abs(aR - bR) +
+        Math.abs(aC - bC) +
+        explosions * multiplier -
+        explosions;
+      totalPaths += distance;
+    }
   }
+  return totalPaths;
 }
 
-console.log(`The solution to part one is: ${totalPaths}`);
+console.log(`The solution to part one is: ${calculateTotalPaths(2)}`);
+console.log(`The solution to part two is: ${calculateTotalPaths(1_000_000)}`);
