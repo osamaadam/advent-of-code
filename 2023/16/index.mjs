@@ -87,7 +87,7 @@ let illuMatrix = Array.from({ length: matrix.length }, () =>
 illuMatrix = navigate([0, -1], DIRECTIONS.EAST, matrix, illuMatrix);
 
 /**
- * @param {number[][]} illuMatrix
+ * @param {number[][]} illumMatrix
  * @returns {number}
  */
 function calculateIlluminations(illumMatrix) {
