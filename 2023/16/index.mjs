@@ -84,22 +84,58 @@ let illuMatrix = Array.from({ length: matrix.length }, () =>
   Array.from({ length: matrix[0].length }, () => 0),
 );
 
-illuMatrix[0][0] = 1;
-illuMatrix[1][0] = 1;
+illuMatrix = navigate([0, -1], DIRECTIONS.EAST, matrix, illuMatrix);
 
-// Noticed that in my input the entry point is actually a mirror
-// So I decided it was easier if I redirect it manually in the beginning.
-illuMatrix = navigate([1, 0], DIRECTIONS.SOUTH, matrix, illuMatrix);
-
-let partOneSolution = 0;
-
-for (let row = 0; row < illuMatrix.length; row++) {
-  for (let col = 0; col < illuMatrix[row].length; col++) {
-    const elem = illuMatrix[row][col];
-    if (elem >= 1) {
-      partOneSolution++;
+/**
+ * @param {number[][]} illuMatrix
+ * @returns {number}
+ */
+function calculateIlluminations(illumMatrix) {
+  let illuminations = 0;
+  for (let row = 0; row < illuMatrix.length; row++) {
+    for (let col = 0; col < illuMatrix[row].length; col++) {
+      const elem = illuMatrix[row][col];
+      if (elem >= 1) {
+        illuminations++;
+      }
     }
   }
+  return illuminations;
 }
 
+const partOneSolution = calculateIlluminations(illuMatrix);
+
 console.log(`The solution to part one is: ${partOneSolution}`);
+
+/** @type {number[][]} */
+const entryPoints = [];
+
+for (let row = 0; row < matrix.length; row++) {
+  entryPoints.push(
+    [[row, -1], DIRECTIONS.EAST],
+    [[row, matrix.length], DIRECTIONS.WEST],
+  );
+}
+
+for (let col = 0; col < matrix[0].length; col++) {
+  entryPoints.push(
+    [[-1, col], DIRECTIONS.SOUTH],
+    [[matrix[0].length, col], DIRECTIONS.NORTH],
+  );
+}
+
+let partTwoSolution = 0;
+
+for (const [pos, dir] of entryPoints) {
+  illuMatrix = Array.from({ length: matrix.length }, () =>
+    Array.from({ length: matrix[0].length }, () => 0),
+  );
+  visited.clear();
+
+  partTwoSolution = Math.max(
+    partTwoSolution,
+    calculateIlluminations(navigate(pos, dir, matrix, illuMatrix)),
+  );
+}
+
+console.log(`The solution to part two is: ${partTwoSolution}`);
