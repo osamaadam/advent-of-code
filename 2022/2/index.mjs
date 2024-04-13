@@ -64,3 +64,51 @@ for (const line of lines) {
 const totalScore = roundScores.reduce((prev, cur) => prev + cur, 0);
 
 console.log(`The solution to the first part is: ${totalScore}`);
+
+/**
+ * @param {string} opp
+ * @param {string} me
+ * @returns {number}
+ */
+function calculateRoundScore2(opp, me) {
+  switch (opp) {
+    case "A":
+      switch (me) {
+        case "X":
+          return 0 + MAP.C;
+        case "Y":
+          return 3 + MAP.A;
+        case "Z":
+          return 6 + MAP.B;
+      }
+    case "B":
+      switch (me) {
+        case "X":
+          return 0 + MAP.A;
+        case "Y":
+          return 3 + MAP.B;
+        case "Z":
+          return 6 + MAP.C;
+      }
+    case "C":
+      switch (me) {
+        case "X":
+          return 0 + MAP.B;
+        case "Y":
+          return 3 + MAP.C;
+        case "Z":
+          return 6 + MAP.A;
+      }
+  }
+}
+
+const secondRoundScores = [];
+
+for (const line of lines) {
+  const [opp, me] = line.split(" ");
+  secondRoundScores.push(calculateRoundScore2(opp, me));
+}
+
+const secondTotalScore = secondRoundScores.reduce((prev, cur) => prev + cur, 0);
+
+console.log(`The solution to the second part is: ${secondTotalScore}`);
