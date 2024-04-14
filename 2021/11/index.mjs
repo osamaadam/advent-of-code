@@ -78,8 +78,14 @@ function stepThrough(steps) {
       updateElement(r, c);
       next = findNext();
     }
+    if (visitedSet.size === matrix.length * matrix[0].length) {
+      console.log(`The solution to part two is: ${i + 101}`);
+      return;
+    }
   }
 }
 
 stepThrough(100);
 console.log(`The solution to part one is: ${flashes}`);
+
+stepThrough(1_000_000);
