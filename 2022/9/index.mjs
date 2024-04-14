@@ -46,27 +46,35 @@ function move(knots = 1) {
     moveTail(1, hPos);
   }
 
-  function moveTail(index, prev) {
+  function moveTail(index) {
     if (index > knots) {
       return;
     }
     const [hR, hC] = tailsPos[index - 1];
     const [tR, tC] = tailsPos[index];
-    if (Math.abs(hR - tR) <= 1 && Math.abs(hC - tC) <= 1) {
+    const [dr, dc] = [hR - tR, hC - tC];
+    if (Math.abs(dr) <= 1 && Math.abs(dc) <= 1) {
       return;
     }
 
-    const tailPrev = [...tailsPos[index]];
-    tailsPos[index] = prev;
+    if (dr === 0) {
+      tailsPos[index][1] += dc / 2;
+    } else if (dc === 0) {
+      tailsPos[index][0] += dr / 2;
+    } else {
+      tailsPos[index][0] += dr > 0 ? 1 : -1;
+      tailsPos[index][1] += dc > 0 ? 1 : -1;
+    }
+
     if (index === knots) {
       const tPos = tailsPos[index];
       visitedCells.add(`${tPos[0]},${tPos[1]}`);
     }
-    moveTail(index + 1, tailPrev);
+    moveTail(index + 1);
   }
 
   return visitedCells.size;
 }
 
 console.log(`The solution to part one is: ${move(1)}`);
-console.log(`The solution to part two is: ${move(10)}`);
+console.log(`The solution to part two is: ${move(9)}`);
