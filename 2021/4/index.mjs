@@ -10,7 +10,10 @@ const matricies = [];
 
 for (const [i, line] of lines.entries()) {
   if (line.length) {
-    const row = line.split(" ").map(Number);
+    const row = line
+      .split(" ")
+      .filter((seg) => seg.trim().length)
+      .map(Number);
     matrix.push(row);
   }
   if (i === lines.length - 1 || line === "") {
@@ -19,15 +22,21 @@ for (const [i, line] of lines.entries()) {
   }
 }
 
-let lastDraw = null;
-let winnerIndex = null;
+let winners = {};
 
-outer: for (const seq of seqs) {
-  lastDraw = seq;
-  for (const [i, matrix] of matricies.entries()) {
+for (const [round, seq] of seqs.entries()) {
+  if (Object.keys(winners).length === matricies.length) {
+    break;
+  }
+  for (const [matrixIndex, matrix] of matricies.entries()) {
+    if (matrixIndex in winners) {
+      continue;
+    }
     if (isBingo(matrix, seq)) {
-      winnerIndex = i;
-      break outer;
+      winners[matrixIndex] = {
+        round,
+        lastDraw: seq,
+      };
     }
   }
 }
@@ -39,21 +48,32 @@ outer: for (const seq of seqs) {
  */
 function isBingo(matrix, seq) {
   let row = -1;
+  let col = -1;
   outer: for (let r = 0; r < matrix.length; r++) {
     for (let c = 0; c < matrix[r].length; c++) {
       if (matrix[r][c] === seq) {
         row = r;
+        col = c;
         matrix[r][c] = null;
         break outer;
       }
     }
   }
 
-  if (row === -1) {
-    return false;
+  let res = false;
+
+  if (row > -1) {
+    res ||= matrix[row].reduce((prev, cur) => prev && cur === null, true);
+  }
+  if (col > -1) {
+    let cur = true;
+    for (let r = 0; r < matrix.length; r++) {
+      cur &&= matrix[r][col] === null;
+    }
+    res ||= cur;
   }
 
-  return matrix[row].reduce((prev, cur) => prev && cur === null, true);
+  return res;
 }
 
 /**
@@ -74,6 +94,16 @@ function calculateScore(matrix, lastDraw) {
   return score * lastDraw;
 }
 
+winners = Object.entries(winners)
+  .map(([key, val]) => [+key, ...Object.values(val)].flat())
+  .sort((a, b) => a[1] - b[1]);
+
 console.log(
-  `The solution to the first part is: ${calculateScore(matricies[winnerIndex], lastDraw)}`,
+  `The solution to the first part is: ${calculateScore(matricies[winners[0][0]], winners[0][2])}`,
+);
+
+const [matrixIndex, _, lastDraw] = winners.at(-1);
+
+console.log(
+  `The solution to the second part is: ${calculateScore(matricies[matrixIndex], lastDraw)}`,
 );
