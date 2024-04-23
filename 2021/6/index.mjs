@@ -4,17 +4,42 @@ const lines = await parseInput("input.txt");
 
 const nums = lines.shift().trim().split(",").map(Number);
 
-for (let i = 0; i < 80; i++) {
-  const newNums = [];
+console.log(`The solution for the first part is: ${calculateNums(nums, 80)}`);
+console.log(`The solution for the second part is: ${calculateNums(nums, 256)}`);
 
-  for (let j = 0; j < nums.length; j++) {
-    if (--nums[j] < 0) {
-      nums[j] = 6;
-      newNums.push(8);
+/**
+ * @param {number[]} nums
+ * @param {number} cycles
+ * @returns {number}
+ */
+function calculateNums(nums, cycles) {
+  let freqMap = {};
+
+  for (const num of nums) {
+    if (num in freqMap) {
+      freqMap[num] += 1;
+    } else {
+      freqMap[num] = 1;
     }
   }
 
-  nums.push(...newNums);
-}
+  for (let i = 0; i < cycles; i++) {
+    const newFreq = {};
+    for (const [key, val] of Object.entries(freqMap).sort(
+      (a, b) => b[0] - a[0],
+    )) {
+      switch (+key) {
+        case 0:
+          newFreq[6] = (newFreq[6] ?? 0) + val;
+          newFreq[8] = val;
+          break;
+        default:
+          newFreq[+key - 1] = val;
+          break;
+      }
+    }
+    freqMap = newFreq;
+  }
 
-console.log(`The solution for the first part is: ${nums.length}`);
+  return Object.values(freqMap).reduce((prev, cur) => prev + cur, 0);
+}
