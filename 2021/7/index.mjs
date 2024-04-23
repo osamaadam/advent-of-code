@@ -22,3 +22,19 @@ for (let i = min; i <= max; i++) {
 }
 
 console.log(`The solution to part one is: ${minDistance}`);
+
+minDistance = Infinity;
+for (let i = min; i <= max; i++) {
+  let distance = 0;
+  for (let j = 0; j < nums.length; j++) {
+    const delta = Math.abs(nums[j] - i);
+    let stepCost = 0;
+    for (let k = 1; k <= delta; k++) {
+      stepCost += k;
+    }
+    distance += stepCost;
+  }
+  minDistance = Math.min(minDistance, distance);
+}
+
+console.log(`The solution to part two is: ${minDistance}`);
