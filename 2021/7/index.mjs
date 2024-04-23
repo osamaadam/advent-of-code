@@ -19,6 +19,9 @@ for (let i = min; i <= max; i++) {
     distance += Math.abs(nums[j] - i);
   }
   minDistance = Math.min(minDistance, distance);
+  if (distance > minDistance) {
+    break;
+  }
 }
 
 console.log(`The solution to part one is: ${minDistance}`);
@@ -35,6 +38,9 @@ for (let i = min; i <= max; i++) {
     distance += stepCost;
   }
   minDistance = Math.min(minDistance, distance);
+  if (distance > minDistance) {
+    break;
+  }
 }
 
 console.log(`The solution to part two is: ${minDistance}`);
