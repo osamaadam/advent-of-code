@@ -43,4 +43,55 @@ function bfs() {
   return total;
 }
 
+/**
+ * @param {number[][]} matrix
+ * @returns {number[][]}
+ */
+function findBasins(matrix) {
+  const visited = new Set();
+  const basins = [];
+
+  for (let r = 0; r < matrix.length; r++) {
+    for (let c = 0; c < matrix[r].length; c++) {
+      const queue = [[r, c]];
+      const basin = [];
+      while (queue.length) {
+        const [row, col] = queue.shift();
+        const k = [row, col].join(",");
+        if (visited.has(k) || matrix[row][col] >= 9) {
+          continue;
+        }
+        visited.add(k);
+
+        basin.push([row, col]);
+        for (const [dr, dc] of DIRS) {
+          const [r2, c2] = [row + dr, col + dc];
+          if (
+            r2 < 0 ||
+            r2 >= matrix.length ||
+            c2 < 0 ||
+            c2 >= matrix[0].length
+          ) {
+            continue;
+          }
+
+          queue.push([r2, c2]);
+        }
+      }
+      if (basin.length) {
+        basins.push(basin);
+      }
+    }
+  }
+
+  return basins;
+}
+
 console.log(`The solution to the first part is: ${bfs()}`);
+
+const multi = findBasins(matrix)
+  .sort((a, b) => b.length - a.length)
+  .slice(0, 3)
+  .reduce((prev, cur) => prev * cur.length, 1);
+
+console.log(`The solution to the second part is: ${multi}`);
