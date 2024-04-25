@@ -6,12 +6,16 @@ const matrix = lines.map((row) => row.split(""));
 
 let startingPoint = null;
 let endingPoint = null;
+let aPlaces = [];
 
 for (let r = 0; r < matrix.length; r++) {
   for (let c = 0; c < matrix[r].length; c++) {
     const el = matrix[r][c];
-    if (el === "S") {
-      startingPoint = [r, c].join(",");
+    if (el === "S" || el === "a") {
+      if (el === "S") {
+        startingPoint = [r, c];
+      }
+      aPlaces.push([r, c]);
     } else if (el === "E") {
       endingPoint = [r, c].join(",");
     }
@@ -71,6 +75,9 @@ function mapShortestPaths(matrix, startingPoint) {
       }
 
       queue.push([r, c]);
+      // if (nextVal === "E".charCodeAt(0) && curVal !== "z".charCodeAt(0)) {
+      //   continue;
+      // }
       const k = [r, c].join(",");
       const curDist = 1 + map[key].distance;
       if ((map[k]?.distance ?? Infinity) > curDist) {
@@ -85,7 +92,24 @@ function mapShortestPaths(matrix, startingPoint) {
   return map;
 }
 
-const pathsMap = mapShortestPaths(matrix, startingPoint.split(",").map(Number));
+const pathsMap = mapShortestPaths(matrix, startingPoint);
 const shortestPath = pathsMap[endingPoint].distance;
 
 console.log(`The solution to the first part is: ${shortestPath}`);
+
+matrix[startingPoint[0]][startingPoint[1]] = "a";
+
+const shortestPaths = [];
+
+for (const aPlace of aPlaces) {
+  const pathsMap = mapShortestPaths(matrix, aPlace);
+  const shortestPath = pathsMap[endingPoint]?.distance ?? Infinity;
+  shortestPaths.push(shortestPath);
+}
+
+const finalShortestPath = shortestPaths.reduce(
+  (prev, cur) => Math.min(prev, cur),
+  Infinity,
+);
+
+console.log(`The solution to the second part is: ${finalShortestPath}`);
