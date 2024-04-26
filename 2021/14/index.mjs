@@ -12,50 +12,19 @@ for (const line of lines) {
   map[seq] = char;
 }
 
-/**
- * @param {string[]} startingSeq
- * @param {Record<string, string>} map
- * @param {number} steps
- * @return {Record<string, number>}
- */
-function stepThrough(startingSeq, map, steps) {
-  let nextArr = [];
-  for (let i = 0; i < steps; i++) {
-    nextArr = [];
-    for (let c = 1; c < startingSeq.length; c++) {
-      const curChar = startingSeq[c];
-      const prevChar = startingSeq[c - 1];
-      const key = [prevChar, curChar].join("");
-      if (c === 1) {
-        nextArr.push(prevChar);
-      }
-      if (key in map) {
-        nextArr.push(map[key], curChar);
-      } else {
-        nextArr.push(curChar);
-      }
-    }
-    startingSeq = nextArr;
-  }
+let freqMap = stepThrough(arr, map, 10);
 
-  const freqMap = {};
-  for (const char of nextArr) {
-    if (char in freqMap) {
-      freqMap[char] += 1;
-    } else {
-      freqMap[char] = 1;
-    }
-  }
-
-  return freqMap;
-}
-
-const freqMap = stepThrough(arr, map, 10);
-
-const sortedValues = Object.values(freqMap).sort((a, b) => b - a);
+let sortedValues = Object.values(freqMap).sort((a, b) => b - a);
 
 console.log(
   `The solution to the first part is: ${sortedValues.at(0) - sortedValues.at(-1)}`,
+);
+
+freqMap = stepThrough(arr, map, 40);
+sortedValues = Object.values(freqMap).sort((a, b) => b - a);
+
+console.log(
+  `The solution to the second part is: ${sortedValues.at(0) - sortedValues.at(-1)}`,
 );
 
 /**
@@ -64,7 +33,7 @@ console.log(
  * @param {number} steps
  * @return {Record<string, number>}
  */
-function stepThroughAgain(startingSeq, map, steps) {
+function stepThrough(startingSeq, map, steps) {
   const freqMap = {
     [startingSeq[0]]: 1,
   };
@@ -114,10 +83,3 @@ function stepThroughAgain(startingSeq, map, steps) {
 
   return freqMap;
 }
-
-const f2Map = stepThroughAgain(arr, map, 40);
-const sortedf2 = Object.values(f2Map).sort((a, b) => b - a);
-
-console.log(
-  `The solution to the second part is: ${sortedf2.at(0) - sortedf2.at(-1)}`,
-);
