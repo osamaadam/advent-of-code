@@ -23,29 +23,12 @@ for (const line of lines) {
   });
 }
 
-/** @type {number[][]} */
-const matrix = [[0]];
-
-/**
- * @param {number} row
- * @param {number} col
- * @param {string} hex
- */
-function expandMatrix(row, col, hex) {
-  if (row >= matrix.length) {
-    matrix.push(Array.from({ length: matrix[0].length }, () => 0));
-  }
-  if (col >= matrix[0].length) {
-    for (const r in matrix) {
-      matrix[r].push(0);
-    }
-  }
-
-  console.log({ row, col, hex });
-  matrix[row][col] = hex;
-}
-
 let cur = [0, 0];
+
+let [minRow, maxRow] = [Infinity, -Infinity];
+let [minCol, maxCol] = [Infinity, -Infinity];
+
+const path = new Set();
 
 for (const instr of instructions) {
   let delta = [0, 0];
@@ -66,10 +49,15 @@ for (const instr of instructions) {
 
   const [dr, dc] = delta;
   for (let i = 0; i < instr.steps; i++) {
+    minRow = Math.min(cur[0], minRow);
+    maxRow = Math.max(cur[0], maxRow);
+    minCol = Math.min(cur[1], minCol);
+    maxCol = Math.max(cur[1], maxCol);
+
+    const key = cur.join(",");
+    path.add(key);
     cur[0] += dr;
     cur[1] += dc;
-    const [row, col] = cur;
-    expandMatrix(row, col, 1);
   }
 }
 
@@ -79,16 +67,19 @@ for (const instr of instructions) {
  * @returns {boolean}
  */
 function isInPolygon(row, col) {
-  if (matrix[row][col] === 1) {
+  let key = [row, col].join(",");
+  if (path.has(key)) {
     return true;
   }
   let rightHits = 0;
 
   let [r, c] = [row, col + 1];
-  while (c < matrix[r].length) {
-    if (matrix[r][c] === 1) {
-      if (c - 1 >= 0) {
-        if (matrix[r][c - 1] === 1) {
+  while (c <= maxCol) {
+    key = [r, c].join(",");
+    if (path.has(key)) {
+      if (c - 1 >= minCol) {
+        const prevKey = [r, c - 1].join(",");
+        if (path.has(prevKey)) {
           c++;
           continue;
         }
@@ -100,10 +91,12 @@ function isInPolygon(row, col) {
 
   let leftHits = 0;
   [r, c] = [row, col - 1];
-  while (c >= 0) {
-    if (matrix[r][c] === 1) {
-      if (c + 1 < matrix[row].length) {
-        if (matrix[r][c + 1] === 1) {
+  while (c >= minCol) {
+    key = [r, c].join(",");
+    if (path.has(key)) {
+      if (c + 1 <= maxCol) {
+        const prevKey = [r, c + 1].join(",");
+        if (path.has(prevKey)) {
           c--;
           continue;
         }
@@ -113,22 +106,40 @@ function isInPolygon(row, col) {
     c--;
   }
 
-  return rightHits > 0 && leftHits > 0 && (leftHits + rightHits) % 2 === 0;
+  const isInside =
+    rightHits > 0 && leftHits > 0 && (leftHits + rightHits) % 2 === 0;
+
+  return isInside;
 }
 
 let cubicmeters = 0;
 
-function printMatrix() {
-  console.log(matrix.map((row) => row.join("")).join("\n"));
-}
-
-for (let r = 0; r < matrix.length; r++) {
-  for (let c = 0; c < matrix[r].length; c++) {
+for (let r = minRow; r <= maxRow; r++) {
+  for (let c = minCol; c <= maxCol; c++) {
     if (isInPolygon(r, c)) {
-      matrix[r][c] = 1;
       cubicmeters++;
     }
   }
 }
 
 console.log(cubicmeters);
+
+function printMatrix() {
+  const matrix = Array.from(
+    {
+      length: maxRow - minRow + 1,
+    },
+    () => Array.from({ length: maxCol - minCol + 1 }, () => 0),
+  );
+
+  for (let r = 0; r < matrix.length; r++) {
+    for (let c = 0; c < matrix[r].length; c++) {
+      const key = [r + minRow, c + minCol].join(",");
+      if (path.has(key)) {
+        matrix[r][c] = 1;
+      }
+    }
+  }
+
+  console.log(matrix.map((row) => row.join("")).join("\n"));
+}
