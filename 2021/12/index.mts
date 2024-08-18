@@ -13,34 +13,55 @@ for (const line of input) {
   map[b].add(a);
 }
 
-const visited = new Set<string>();
+const visited: Record<string, number> = {};
 
 let ans = 0;
 
-function dfs(cave: string) {
+function dfs(cave: string, numOfVisits = 1) {
   if (cave === "end") {
     ans++;
     return;
   }
 
-  if (visited.has(cave)) {
-    return;
+  if (cave === cave.toLowerCase()) {
+    if (!(cave in visited)) {
+      visited[cave] = 0;
+    }
+    visited[cave]++;
+    if (visited[cave] > numOfVisits) {
+      visited[cave]--;
+      return;
+    }
   }
 
-  if (cave === cave.toLowerCase()) {
-    visited.add(cave);
+  let numOfViolations = 0;
+  for (const freq of Object.values(visited)) {
+    if (freq > 1) {
+      numOfViolations++;
+    }
+  }
+
+  if (numOfViolations > 1) {
+    visited[cave]--;
+    return;
   }
 
   for (const next of map[cave]) {
     if (next === "start") continue;
-    dfs(next);
+    dfs(next, numOfVisits);
   }
 
   if (cave === cave.toLowerCase()) {
-    visited.delete(cave);
+    visited[cave]--;
   }
 }
 
-dfs("start");
+dfs("start", 1);
 
 console.log(`Answer for part 1: ${ans}`);
+
+ans = 0;
+
+dfs("start", 2);
+
+console.log(`Answer for part 2: ${ans}`);
