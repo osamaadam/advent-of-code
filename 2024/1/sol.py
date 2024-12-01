@@ -2,7 +2,6 @@ from collections import defaultdict
 
 left, right = [], []
 freq = defaultdict(int)
-
 with open('input.txt', 'r') as f:
     for line in f:
         [l, r] = line.split()
@@ -10,11 +9,8 @@ with open('input.txt', 'r') as f:
         right.append(int(r))
         freq[int(r)] += 1
 
-left = sorted(left)
-right = sorted(right)
-
-distance = 0
-similarity = 0
+left, right = sorted(left), sorted(right)
+distance, similarity = 0, 0
 
 for i in range(len(left)):
     distance += abs(left[i] - right[i])
