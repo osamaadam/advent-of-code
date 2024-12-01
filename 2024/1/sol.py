@@ -1,20 +1,21 @@
 from collections import defaultdict
+from heapq import heappop, heappush
 
 left, right = [], []
 freq = defaultdict(int)
 with open('input.txt', 'r') as f:
     for line in f:
-        [l, r] = line.split()
-        left.append(int(l))
-        right.append(int(r))
-        freq[int(r)] += 1
+        [l, r] = map(int, line.strip().split())
+        heappush(left, l)
+        heappush(right, r)
+        freq[r] += 1
 
-left, right = sorted(left), sorted(right)
 distance, similarity = 0, 0
 
-for i in range(len(left)):
-    distance += abs(left[i] - right[i])
-    similarity += left[i] * freq[left[i]]
+while left:
+    l, r = heappop(left), heappop(right)
+    distance += abs(l - r)
+    similarity += l * freq[l]
 
 print("Solution for part 1:", distance)
 print("Solution for part 2:", similarity)
