@@ -26,9 +26,26 @@ def followsRules(update):
     return update[len(update) // 2]
 
 
+def sortCorrectly(update):
+    while True:
+        isSorted = True
+        for i in range(1, len(update)):
+            if [update[i], update[i - 1]] in rules:
+                isSorted = False
+                update[i], update[i - 1] = update[i - 1], update[i]
+
+        if isSorted:
+            return update
+
+
 result = 0
+incorrectResult = 0
 for update in updates:
     mid = followsRules(update)
     result += mid
+    if mid == 0:
+        update = sortCorrectly(update)
+        incorrectResult += followsRules(update)
 
 print(f"Result: {result}")
+print(f"Incorrect result: {incorrectResult}")
