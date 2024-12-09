@@ -13,28 +13,41 @@ with open("input.txt", "r") as file:
                 startingPos = (len(matrix) - 1, i)
 
 visited = set()
-visited.add(startingPos)
+(row, col) = startingPos
+startingDelta = directions[matrix[row][col]]
 
 
-def navigate(row, col, delta):
+def navigate(matrix, row, col, delta):
+    visitedWithDirs = set()
     while row < len(matrix) and col < len(matrix[0]) and row >= 0 and col >= 0:
         if matrix[row][col] == "#":
             row, col = row - dr, col - dc
             delta = nextMove[delta]
             continue
+        elif (row, col, delta) in visitedWithDirs:
+            return True
         visited.add((row, col))
+        visitedWithDirs.add((row, col, delta))
         (dr, dc) = delta
         (row, col) = (row + dr, col + dc)
 
+    return False
 
-(row, col) = startingPos
-delta = directions[matrix[row][col]]
 
-navigate(row, col, delta)
+navigate(matrix, row, col, startingDelta)
 
 print(f"Result: {len(visited)}")
 
-# for row, col in visited:
-#     matrix[row][col] = "X"
 
-# print("\n".join(["".join(row) for row in matrix]))
+uniqueObstacles = set()
+visitedCopy = visited.copy()
+for row, col in visitedCopy:
+    if (row, col) == startingPos:
+        continue
+    visited.clear()
+    matrixCopy = [list(r) for r in matrix]
+    matrixCopy[row][col] = "#"
+    if navigate(matrixCopy, startingPos[0], startingPos[1], startingDelta):
+        uniqueObstacles.add((row, col))
+
+print(f"Unique obstacles: {len(uniqueObstacles)}")
