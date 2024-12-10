@@ -10,18 +10,31 @@ with open("input.txt", "r") as file:
         input.append([result, *nums])
 
 
-def isSolvable(result, nums):
+def isSolvable(result, nums, operators):
     if len(nums) == 1:
         return nums[0] == result
 
-    return isSolvable(result, [nums[0] + nums[1], *nums[2:]]) or isSolvable(
-        result, [nums[0] * nums[1], *nums[2:]]
-    )
+    for op in operators:
+        if isSolvable(result, [op(nums[0], nums[1]), *nums[2:]], operators):
+            return True
+
+    return False
 
 
 res = 0
 for [result, *nums] in input:
-    if isSolvable(result, nums):
+    if isSolvable(result, nums, [lambda a, b: a + b, lambda a, b: a * b]):
         res += result
 
-print(f"Result: {res}")
+print(f"Result for first part: {res}")
+
+res = 0
+for [result, *nums] in input:
+    if isSolvable(
+        result,
+        nums,
+        [lambda a, b: a + b, lambda a, b: a * b, lambda a, b: int(str(a) + str(b))],
+    ):
+        res += result
+
+print(f"Result for second part: {res}")
