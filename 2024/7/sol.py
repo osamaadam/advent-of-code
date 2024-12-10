@@ -1,4 +1,4 @@
-input = {}
+input = []
 
 with open("input.txt", "r") as file:
     for line in file:
@@ -6,7 +6,8 @@ with open("input.txt", "r") as file:
             continue
         result, nums = line.strip().split(": ")
         result = int(result)
-        input[result] = [int(x) for x in nums.split()]
+        nums = [int(x) for x in nums.split()]
+        input.append([result, *nums])
 
 
 def isSolvable(result, nums):
@@ -19,7 +20,7 @@ def isSolvable(result, nums):
 
 
 res = 0
-for result, nums in input.items():
+for [result, *nums] in input:
     if isSolvable(result, nums):
         res += result
 
