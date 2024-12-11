@@ -1,38 +1,39 @@
-unFragmented = []
-stack = []
+pattern = []
 with open("input.txt", "r") as file:
-    pattern = list(file.readline().strip())
+    pattern = list(map(int, list(file.readline().strip())))
+
+
+def constructFS(pattern):
+    fs = []
     id = 0
-    for i in range(len(pattern)):
-        addition = ""
+    for i, num in enumerate(pattern):
         if i % 2 == 0:
-            addition = str(id) * int(pattern[i])
+            fs.extend([id] * num)
             id += 1
-        elif i % 2 == 1 and i == len(pattern) - 1:
-            continue
         else:
-            addition = "." * int(pattern[i])
-        unFragmented.extend(list(addition))
+            fs.extend([None] * num)
 
-fragmented = []
-for i in range(len(unFragmented)):
-    if unFragmented[i] != ".":
-        fragmented.append(unFragmented[i])
-    else:
-        farthestMember = False
-        for j in reversed(range(len(unFragmented))):
-            if j <= i:
+    return fs
+
+
+def defragment(fs):
+    i = 0
+    while i < len(fs):
+        if fs[i] is None:
+            while (popped := fs.pop()) is None:
+                pass
+            fs[i] = popped
+            if i == len(fs):
                 break
-            elif unFragmented[j] != ".":
-                farthestMember = j
-                break
-        if farthestMember == False:
-            break
-        fragmented.append(unFragmented[farthestMember])
-        unFragmented[farthestMember] = "."
+        i += 1
 
-res = 0
-for i in range(len(fragmented)):
-    res += int(fragmented[i]) * i
+    return fs
 
-print(f"Result: {res}")
+
+def calculateChecksum(fs):
+    return sum([i * num for i, num in enumerate(fs)])
+
+
+fs = constructFS(pattern)
+fs = defragment(fs)
+print(f"Checksum: {calculateChecksum(fs)}")
